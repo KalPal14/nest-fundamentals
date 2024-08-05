@@ -12,22 +12,24 @@ import { appConfig } from './config/app.config';
 @Module({
   imports: [
     CoffeesModule,
+    TypeOrmModule.forRootAsync({
+      useFactory: () => ({
+        type: 'postgres',
+        host: process.env.DATABASE_HOST,
+        port: +process.env.DATABASE_PORT,
+        username: process.env.DATABASE_USERNAME,
+        password: process.env.DATABASE_PASSWORD,
+        database: process.env.DATABASE_NAME,
+        autoLoadEntities: true,
+        synchronize: true,
+      }),
+    }),
     ConfigModule.forRoot({
       load: [appConfig],
       validationSchema: Joi.object({
         DATABASE_HOST: Joi.string().required(),
         DATABASE_PORT: Joi.number().default(5432),
       }),
-    }),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DATABASE_HOST,
-      port: +process.env.DATABASE_PORT,
-      username: process.env.DATABASE_USERNAME,
-      password: process.env.DATABASE_PASSWORD,
-      database: process.env.DATABASE_NAME,
-      autoLoadEntities: true,
-      synchronize: true,
     }),
     CoffeeRatingModule,
     DatabaseModule,
