@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import { HttpExeptionFilter } from './common/filters/http-exeption/http-exeption.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -13,6 +14,7 @@ async function bootstrap() {
       },
     }),
   );
+  app.useGlobalFilters(new HttpExeptionFilter());
   await app.listen(3000);
 }
 bootstrap();
