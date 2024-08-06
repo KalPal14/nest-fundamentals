@@ -23,7 +23,7 @@ export class CoffeesService {
     @Inject(coffeesConfig.KEY)
     coffeesConfiguration: ConfigType<typeof coffeesConfig>,
   ) {
-    console.log(coffeesConfiguration.promo.cod); // number
+    console.log(coffeesConfiguration.promo.cod);
     console.log(coffeesConfiguration.foo);
   }
 
