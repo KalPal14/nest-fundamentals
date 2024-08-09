@@ -1,49 +1,48 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
 import { Coffee } from './entities/coffee.entity';
+import { Model } from 'mongoose';
+import { CreateCoffeeDto } from './dto/create-coffee.dto';
+import { UpdateCoffeeDto } from './dto/update-coffee.dto';
 
 @Injectable()
 export class CoffeesService {
-  private coffees: Coffee[] = [
-    {
-      id: 1,
-      name: 'Kozak Latte',
-      brand: 'Lviv kava',
-      flavors: ['salo', 'gorilka'],
-    },
-  ];
+  constructor(
+    @InjectModel(Coffee.name) private readonly coffeeModel: Model<Coffee>,
+  ) {}
 
-  findAll() {
-    return this.coffees;
+  async findAll() {
+    return await this.coffeeModel.find().exec();
   }
 
-  findOne(id: number) {
-    const coffee = this.coffees.find((coffee) => coffee.id == id);
+  async findOne(id: string) {
+    const coffee = await this.coffeeModel.findOne({ _id: id }).exec();
     if (!coffee) {
       throw new NotFoundException(`Coffee #${id} not found`);
     }
     return coffee;
   }
 
-  create(createCoffeeDto: any) {
-    this.coffees.push(createCoffeeDto);
-    return createCoffeeDto;
+  async create(createCoffeeDto: CreateCoffeeDto) {
+    const coffee = new this.coffeeModel(createCoffeeDto);
+    return await coffee.save();
   }
 
-  update(id: number, updateCoffeeDto: any) {
-    const coffeIndex = this.coffees.findIndex((coffee) => coffee.id == id);
-    if (coffeIndex >= 0) {
-      this.coffees[coffeIndex] = {
-        ...this.coffees[coffeIndex],
-        ...updateCoffeeDto,
-      };
-      return updateCoffeeDto;
+  async update(id: string, updateCoffeeDto: UpdateCoffeeDto) {
+    const existingCoffee = await this.coffeeModel.findOneAndUpdate(
+      { _id: id },
+      { $set: updateCoffeeDto },
+      { new: true },
+    );
+    if (!existingCoffee) {
+      throw new NotFoundException(`Coffee #${id} not found`);
     }
+    return existingCoffee;
   }
 
-  remove(id: number) {
-    const coffeIndex = this.coffees.findIndex((coffee) => coffee.id == id);
-    if (coffeIndex >= 0) {
-      this.coffees.splice(coffeIndex, 1);
-    }
+  async remove(id: string) {
+    const coffee = await this.findOne(id);
+    await coffee.deleteOne();
+    return coffee;
   }
 }
