@@ -3,14 +3,15 @@ import { SchemaTypes } from 'mongoose';
 
 @Schema()
 export class Event {
-  @Prop()
+  @Prop({ index: true })
   name: string;
 
   @Prop()
   type: string;
 
   @Prop(SchemaTypes.Mixed)
-  event: Record<string, any>;
+  payload: Record<string, any>;
 }
 
 export const EventSchema = SchemaFactory.createForClass(Event);
+EventSchema.index({ name: 1, type: -1 });
